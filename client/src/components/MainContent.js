@@ -79,14 +79,8 @@ function MainContent() {
 			console.log("Response from API:", response.data);
 
 			// Check if the API returned a videoResult with a videoFilename
-			if (
-				response.status === 200 &&
-				response.data.videoResult &&
-				response.data.videoResult.videoFilename
-			) {
-				const videoFilename = response.data.videoResult.videoFilename;
-				// Construct the URL to the video in the local /outputs/videos folder
-				const videoFileUrl = `http://localhost:4000/outputs/videos/${videoFilename}`;
+			if (response.status === 200 && response.data.videoResult) {
+				const videoFileUrl = response.data.videoResult;
 				setVideoUrl(videoFileUrl);
 				setReelReady(true);
 			} else {
