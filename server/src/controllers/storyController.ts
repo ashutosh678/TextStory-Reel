@@ -10,6 +10,7 @@ import { synthesizeSpeech, getAudioDuration } from "../services/audioService"; /
 import { compileVideoWithFullAudio } from "../services/videoService"; // Use a potentially renamed/new video function
 import * as imageService from "../services/imageService"; // For saving images
 import path from "path";
+import { uploadVideo } from "../services/cloudinaryService"; // Import the Cloudinary service
 
 // Result structure for each scene
 interface SceneProcessingResult {
@@ -126,6 +127,7 @@ export const generateImagesFromStory = async (
 		// 4. Compile Video using images and the single audio file
 		let videoResult: VideoCompilationResult | null = null;
 		let videoError: string | undefined = fullAudioError; // Start with potential audio error
+		let videoUploadResult;
 
 		// Attempt video compilation only if we have images AND the full story audio
 		if (successfulImageFilenames.length > 0 && fullAudioFilename) {
@@ -146,6 +148,17 @@ export const generateImagesFromStory = async (
 				console.log(
 					`Video compilation successful: ${videoResult.videoFilename}`
 				);
+
+				// Construct the full path to the video file
+				const videoFilePath = path.join(
+					__dirname,
+					"../../outputs/videos",
+					`${videoBaseName}.mp4`
+				);
+
+				// Upload the video to Cloudinary
+				const videoUploadResult = await uploadVideo(videoFilePath);
+				console.log("Video uploaded to Cloudinary:", videoUploadResult);
 			} catch (compileErr) {
 				const message =
 					compileErr instanceof Error ? compileErr.message : String(compileErr);
@@ -173,7 +186,7 @@ export const generateImagesFromStory = async (
 			message: "Story processing complete.",
 			sceneImageResults: sceneResults, // Renamed for clarity
 			fullAudioFilename: fullAudioFilename,
-			videoResult: videoResult,
+			videoResult: videoUploadResult!.secure_url,
 			videoError: videoError,
 		});
 	} catch (error) {

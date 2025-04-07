@@ -1,6 +1,7 @@
 import express, { Express, Request, Response, NextFunction } from "express";
 import imageRoutes from "./routes/imageRoutes"; // Use import syntax
 import cors from "cors";
+import videoRoutes from "./routes/videoRoutes";
 
 const app: Express = express();
 app.use(cors());
@@ -10,6 +11,7 @@ app.use(express.json()); // for parsing application/json
 
 // Mount Routes
 app.use("/api/v1", imageRoutes); // Mount image routes under /api/v1 (or /api if preferred)
+app.use("/api/v1", videoRoutes); // Use the video routes
 
 // Basic Route (we'll move this later) - REMOVED
 /*

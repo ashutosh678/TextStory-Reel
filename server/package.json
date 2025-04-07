@@ -18,6 +18,7 @@
 		"@google/generative-ai": "^0.24.0",
 		"@types/ffprobe": "^1.1.8",
 		"@types/fluent-ffmpeg": "^2.1.27",
+		"cloudinary": "^2.6.0",
 		"cors": "^2.8.5",
 		"dotenv": "^16.4.7",
 		"express": "^5.1.0",
