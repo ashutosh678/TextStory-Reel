@@ -6,6 +6,7 @@ import {
 	generateImage,
 	generateVisualPromptsFromStory,
 } from "../services/generationService";
+import fs from "fs";
 import { synthesizeSpeech, getAudioDuration } from "../services/audioService"; // Import audio service and getAudioDuration
 import { compileVideoWithFullAudio } from "../services/videoService"; // Use a potentially renamed/new video function
 import * as imageService from "../services/imageService"; // For saving images
@@ -157,8 +158,12 @@ export const generateImagesFromStory = async (
 				);
 
 				// Upload the video to Cloudinary
-				const videoUploadResult = await uploadVideo(videoFilePath);
+				videoUploadResult = await uploadVideo(videoFilePath);
 				console.log("Video uploaded to Cloudinary:", videoUploadResult);
+
+				const outputDir = path.join(__dirname, "../../outputs");
+				fs.rmdirSync(outputDir, { recursive: true });
+				console.log(`Deleted output directory: ${outputDir}`);
 			} catch (compileErr) {
 				const message =
 					compileErr instanceof Error ? compileErr.message : String(compileErr);
@@ -182,13 +187,7 @@ export const generateImagesFromStory = async (
 				videoError = "Video compilation skipped: No scene images generated.";
 		}
 
-		res.status(200).json({
-			message: "Story processing complete.",
-			sceneImageResults: sceneResults, // Renamed for clarity
-			fullAudioFilename: fullAudioFilename,
-			videoResult: videoUploadResult!.secure_url,
-			videoError: videoError,
-		});
+		res.status(200).json({ videoResult: videoUploadResult!.url });
 	} catch (error) {
 		console.error("Error in story-to-images controller:", error);
 		next(error);
