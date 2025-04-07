@@ -93,8 +93,31 @@ function MainContent() {
 		}
 	};
 
-	const handleDownloadClick = () => {
-		console.log("Download button clicked");
+	const handleDownloadClick = async () => {
+		if (!videoUrl) {
+			console.error("No video to download");
+			return;
+		}
+		try {
+			// Fetch the video as a Blob
+			const response = await axios.get(videoUrl, { responseType: "blob" });
+			const blob = new Blob([response.data], { type: "video/mp4" });
+			// Create an object URL for the Blob
+			const downloadUrl = window.URL.createObjectURL(blob);
+
+			// Create an anchor element and trigger a download programmatically.
+			const anchor = document.createElement("a");
+			anchor.href = downloadUrl;
+			anchor.download = "reel.mp4"; // Change filename if needed.
+			document.body.appendChild(anchor);
+			anchor.click();
+
+			// Clean up and remove the anchor.
+			document.body.removeChild(anchor);
+			window.URL.revokeObjectURL(downloadUrl);
+		} catch (error) {
+			console.error("Error downloading reel:", error);
+		}
 	};
 
 	// Generate bubbles with different properties
