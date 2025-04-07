@@ -1,7 +1,9 @@
 import express, { Express, Request, Response, NextFunction } from "express";
 import imageRoutes from "./routes/imageRoutes"; // Use import syntax
+import cors from "cors";
 
 const app: Express = express();
+app.use(cors());
 
 // Basic Middleware (add more as needed)
 app.use(express.json()); // for parsing application/json

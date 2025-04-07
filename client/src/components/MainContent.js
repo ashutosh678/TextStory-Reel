@@ -9,6 +9,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import MovieCreationIcon from "@mui/icons-material/MovieCreation";
 import Paper from "@mui/material/Paper";
 import { keyframes } from "@mui/system";
+import axios from "axios";
 
 // Define animations
 const moveUpAnimation = keyframes`
@@ -60,14 +61,42 @@ function MainContent() {
 	const [inputText, setInputText] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [reelReady, setReelReady] = useState(false);
+	const [videoUrl, setVideoUrl] = useState("");
 
-	const handleConvertClick = () => {
+	const handleConvertClick = async () => {
+		// Initiate loading; clear any previous video URL and reel state.
 		setIsLoading(true);
 		setReelReady(false);
-		setTimeout(() => {
+		setVideoUrl("");
+
+		try {
+			// Send a POST request to your API with the story text as the payload.
+			const response = await axios.post(
+				"http://localhost:4000/api/v1/story-to-images",
+				{ story: inputText } // Adjust the payload field name as necessary
+			);
+
+			console.log("Response from API:", response.data);
+
+			// Check if the API returned a videoResult with a videoFilename
+			if (
+				response.status === 200 &&
+				response.data.videoResult &&
+				response.data.videoResult.videoFilename
+			) {
+				const videoFilename = response.data.videoResult.videoFilename;
+				// Construct the URL to the video in the local /outputs/videos folder
+				const videoFileUrl = `http://localhost:4000/outputs/videos/${videoFilename}`;
+				setVideoUrl(videoFileUrl);
+				setReelReady(true);
+			} else {
+				console.error("API did not return a valid video result.");
+			}
+		} catch (error) {
+			console.error("Error during conversion:", error);
+		} finally {
 			setIsLoading(false);
-			setReelReady(true);
-		}, 3000);
+		}
 	};
 
 	const handleDownloadClick = () => {
@@ -224,30 +253,24 @@ function MainContent() {
 									Generating your reel...
 								</Typography>
 							</Box>
-						) : reelReady ? (
+						) : reelReady && videoUrl ? (
 							<Box sx={{ textAlign: "center", width: "100%" }}>
 								<Typography variant="h6" gutterBottom sx={{ color: "white" }}>
 									Reel Preview
 								</Typography>
 								<Box
 									sx={{
-										height: 300,
-										width: "100%",
-										bgcolor: "rgba(255, 255, 255, 0.9)",
-										borderRadius: 1,
-										display: "flex",
-										alignItems: "center",
-										justifyContent: "center",
 										mb: 3,
-										transition: "all 0.3s ease",
-										"&:hover": {
-											transform: "scale(1.02)",
-										},
+										width: "100%",
+										borderRadius: 1,
+										overflow: "hidden",
 									}}
 								>
-									<Typography color="text.secondary">
-										[Reel Video Placeholder]
-									</Typography>
+									{/* Render HTML5 video player */}
+									<video width="100%" height="300" controls>
+										<source src={videoUrl} type="video/mp4" />
+										Your browser does not support the video tag.
+									</video>
 								</Box>
 								<Button
 									variant="contained"
